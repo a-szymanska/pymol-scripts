@@ -1,25 +1,27 @@
 import numpy as np
+import re
 
-def mark_termini(term):
+def mark_termini(name="all", term="C"):
     if term == "C":
         get_res = lambda arr: int(np.max(arr))
-        not_c_val = -np.inf
+        not_c_val = -1
         color = "tv_red"
     elif term == "N":
         get_res = lambda arr: int(np.min(arr))
-        not_c_val = np.inf
+        not_c_val = 1
         color = "limon"
     else:
         print("Chose C or N terminus")
     
-    chains = cmd.get_chains("all")
+    chains = cmd.get_chains(name)
     print(f"Chains found:\n{chains}")
-    for name in chains:
-        cmd.select(f"chain_sele", f"chain {name}")
+    for ch_name in chains:
+        cmd.select(f"chain_sele", f"chain {ch_name}")
         model = cmd.get_model("chain_sele")
-        residues = [int(a.resi) if a.name[0] == 'C' else not_c_val for a in model.atom]
+        not_c_val *= len(model.atom)
+        residues = [int(re.findall(r'\d+', a.resi)[0]) if a.name[0] == 'C' else not_c_val for a in model.atom]
         term_residue = get_res(residues)
-        cmd.select("terminus", f"chain {name} and resi {term_residue} and name CA")
+        cmd.select("terminus", f"chain {ch_name} and resi {term_residue} and name CA")
         cmd.show("spheres", "terminus")
         cmd.color(f"{color}", "terminus")
 
