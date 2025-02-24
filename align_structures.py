@@ -1,6 +1,14 @@
 from pymol import cmd
 import numpy as np
 
+'''
+v0, v1, p0, p1, p2 - selections, may consist of several atoms
+name - name of structure A (the one to be aligned)
+
+v0, v1 determine the axis along structure A
+p0, p1, p2 determine the perpendicular plane on structure B
+v0 is 'attached' to p0
+'''
 def align(v0, v1, p0, p1, p2, name):
 
     def get_coord(selection):
