@@ -170,8 +170,11 @@ def pack_cylinder(name : str, color : tuple = COLOR, margin : float = 1.0):
 
     distances = [get_distance_to_axis(x, p0_fitted, axis_vector) for x in points]
     max_dist = np.max(distances)
-    r = max(r, max_dist) + EPSILON
+    r = max(r, max_dist) + EPSILON + margin
     p1_base, p2_base = find_base_centers(points, p0_fitted, axis_vector)
+    axis_vector = axis_vector / np.linalg.norm(axis_vector)  # Normalize axis vector
+    p1_base -= axis_vector * margin
+    p2_base += axis_vector * margin
     
     cylinder = [cgo.CONE, *p1_base, *p2_base, r, r, *color, *color, 0, 1]
 
