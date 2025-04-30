@@ -40,9 +40,10 @@ print(m)
 `min_distance.py`  
 Finds minimum distance between atoms of the two input structures. It uses a Divide-and-Conquer algorithm with a complexity of $O(n \log n)$, where $n$ is the total number of atoms, and thus it runs several dozen times faster than the brute force approach.
 ```python
-dist = min_dist("1AAC", "5AAC")
-print(dist)
+print(min_dist("1AAC", "5AAC", C_only=False))
 ```
+With C_only=True, only carbon atoms are considered, which gives an approximate result, but can noticeably speed up calculations for large structures.
+
 
 ## Dependencies
 - PyMOL

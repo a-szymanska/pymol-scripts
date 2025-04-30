@@ -1,5 +1,5 @@
 from pymol import cmd, cgo
-from scipy.spatial.distance import euclidean as dist
+from scipy.spatial.distance import euclidean
 
 def strip_closest(strip, d):
     min_d = d
@@ -7,8 +7,8 @@ def strip_closest(strip, d):
     strip.sort(key=lambda point: point[0][1])
     for i in range(len(strip)):
         for j in range(i + 1, len(strip)):
-            if strip[i][1] != strip[j][1] and dist(strip[i][0], strip[j][0]) < min_d:
-                min_d = dist(strip[i][0], strip[j][0])
+            if strip[i][1] != strip[j][1] and euclidean(strip[i][0], strip[j][0]) < min_d:
+                min_d = euclidean(strip[i][0], strip[j][0])
                 min_points = (strip[i][0], strip[j][0])
             else:
                 break
@@ -21,8 +21,8 @@ def min_dist_helper(points, l, r):
         min_points = None
         for i, p in enumerate(points[l: r]):
             for q in points[i + 1: r]:
-                if p[1] != q[1] and dist(p[0], q[0]) < min_d:
-                    min_d = dist(p[0], q[0])
+                if p[1] != q[1] and euclidean(p[0], q[0]) < min_d:
+                    min_d = euclidean(p[0], q[0])
                     min_points = (p[0], q[0])
         return min_d, min_points
 
@@ -44,14 +44,22 @@ def min_dist_helper(points, l, r):
         return d_center, points_center
 
 
-def min_dist(objA : str, objB : str) -> float:
-    pointsA = cmd.get_coords(objA, 1)
-    pointsB = cmd.get_coords(objB, 1)
+def get_coords(name, C_only=False):
+    if C_only:
+        model = cmd.get_model(name)
+        coords = [atom.coord for atom in model.atom if atom.symbol == 'C']
+    else:
+        coords = cmd.get_coords(name, 1)
+    return coords
+
+
+def min_dist(nameA : str, nameB : str, C_only : bool = False) -> float:
+    pointsA = get_coords(nameA, C_only)
+    pointsB = get_coords(nameB, C_only)
     pointsAB = [(p, 0) for p in pointsA] + [(p, 1) for p in pointsB]
     pointsAB.sort(key=lambda p: p[0][0])
     min_d, (pointA, pointB) = min_dist_helper(pointsAB, 0, len(pointsAB))
     for i, point in enumerate([pointA, pointB]):
-        print(point)
         sphere = [cgo.SPHERE, *point, 0.4]
         cmd.load_cgo(sphere, f"point{i}")
         cmd.pseudoatom("tmp", pos=list(point))
